@@ -1,4 +1,15 @@
-import { IsEmail, IsNotEmpty, IsNumber, IsString, ValidateNested, Validate, ArrayMinSize, ValidationArguments, ValidatorConstraint, ValidatorConstraintInterface } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsNumber,
+  IsString,
+  ValidateNested,
+  Validate,
+  ArrayMinSize,
+  ValidationArguments,
+  ValidatorConstraint,
+  ValidatorConstraintInterface,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 @ValidatorConstraint({ name: 'customText', async: false })
@@ -35,12 +46,14 @@ class AddressDto {
 
   @IsString()
   @IsNotEmpty()
-  @Validate(CustomTextConstraint, { message: 'Zip code must be 6 characters long (excluding spaces)' })
+  @Validate(CustomTextConstraint, {
+    message: 'Zip code must be 6 characters long (excluding spaces)',
+  })
   zipcode: string;
 
   @IsString()
   @IsNotEmpty()
-  phonenumber: string;
+  phoneNumber: string;
 }
 
 class PackageDto {
@@ -55,24 +68,6 @@ class PackageDto {
 
   @IsNumber()
   weight: number;
-
-  getVolume(): number {
-    return this.height * this.length * this.width;
-  }
-
-  getPrice(): number {
-    let price = 1; // Each package costs €1
-    const volume = this.getVolume();
-    const weight = this.weight;
-
-    if (volume >= 5000) {
-      price += Math.floor((volume - 5000) / 5000) * 0.50;
-    }
-
-    price += weight * 0.10; // For every kilogram of weight, add €0.10 to the price
-
-    return price;
-  }
 }
 
 export class CreateOrderDto {
@@ -91,11 +86,4 @@ export class CreateOrderDto {
   @ArrayMinSize(1, { message: 'At least 1 package is required' })
   packages: PackageDto[];
 
-  getTotalPrice(): number {
-    let totalPrice = 0;
-    for (const pkg of this.packages) {
-      totalPrice += pkg.getPrice();
-    }
-    return totalPrice;
-  }
 }

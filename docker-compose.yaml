@@ -1,36 +1,28 @@
-version: '3.7'
-
+version: '3.8'
 services:
-  nest:
-    container_name: 'nest'
+  # app service for your backend
+  app:
+    container_name: backend
     build:
-      context: .
-      target: development
-    volumes:
-      - .:/usr/src/app
-      # - /usr/src/app/node_modules
-    ports:
-      - ${SERVER_PORT}:${SERVER_PORT}
-      - 9229:9229
-    command: npm run start:debug
-    env_file:
-      - .env
-    depends_on:
-      - mongo
-  mongo:
-    image: mongo:latest
-    container_name: 'nest_mongo'
-    volumes:
-      - mongodb_data_container:/data/db
-    env_file:
-      - .env
+      context: ./
+      dockerfile: Dockerfile
     environment:
-      - MONGO_INITDB_DATABASE=${MONGO_DATEBASE}
-      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USERNAME}
-      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
+      DATABASE_NAME: my_database
+      DATABASE_USER: my_username
+      DATABASE_PASS: my_password
+      DATABASE_URI: mongodb://localhost:27017
     ports:
-      - ${MONGO_PORT}:${MONGO_PORT}
-networks:
-  webnet:
-volumes:
-  mongodb_data_container:
+      - '4000:4000'
+    depends_on:
+      - database
+
+  # start the mongodb service as container
+  database:
+    image: mongo:6.0
+    container_name: mongodb
+    restart: always
+    ports:
+      - '27017:27017'
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: my_username
+      MONGO_INITDB_ROOT_PASSWORD: my_database

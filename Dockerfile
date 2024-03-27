@@ -1,28 +1,22 @@
-FROM node:14.15.5-alpine3.10 AS development
+FROM node:latest as builder
 
-WORKDIR /usr/src/app
-
+WORKDIR /app
 COPY package*.json ./
-
-RUN npm install --only=development
-
+RUN npm install
 COPY . .
-
 RUN npm run build
 
-FROM node:14.15.5-alpine3.10 AS production
 
-ARG NODE_ENV=production
-ENV NODE_ENV=${NODE_ENV}}
+# Build the image as production
+# So we can minimize the size
+FROM node:latest
 
-WORKDIR /usr/src/app
-
+WORKDIR /app
 COPY package*.json ./
+ENV PORT=4000
+ENV NODE_ENV=Production
+RUN npm install
+COPY --from=builder /app/dist ./dist
+EXPOSE ${PORT}
 
-RUN npm install --only=production
-
-COPY . .
-
-COPY --from=development /usr/src/app/dist ./dist
-
-CMD ["node", "dist/main"]
+CMD ["npm", "run", "start"]

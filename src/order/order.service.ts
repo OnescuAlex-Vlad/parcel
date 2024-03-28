@@ -3,21 +3,21 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Order, OrderDocument, OrderStatus } from './order.schema';
 import { Model } from 'mongoose';
 import { CreateOrderDto } from './dto/create-order.dto';
-import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 
 @Injectable()
 export class OrderService {
   constructor(
     @InjectModel(Order.name) private OrderModel: Model<OrderDocument>,
   ) {}
-
+  
   async createOrder(createOrderDto: CreateOrderDto): Promise<Order> {
     const createdOrder = new this.OrderModel({
       ...createOrderDto,
-      status: 'created',
+      status: OrderStatus.CREATED,
     });
-    console.log(createdOrder);
+    
     const order = await createdOrder.save();
+   
     return order;
   }
 
@@ -44,13 +44,11 @@ export class OrderService {
     return updatedOrder;
   }
 
-  async updateOrderStatus(orderId: string, updateOrderStatusDto: UpdateOrderStatusDto): Promise<Order> {
+  async updateOrderStatus(orderId: string, status: OrderStatus): Promise<Order> {
     const order = await this.OrderModel.findById(orderId);
-    if (!order) {
-      throw new NotFoundException('Order not found');
-    }
+    console.log('order', orderId);
 
-    order.status = updateOrderStatusDto.status;
+    order.status = status;
     return await order.save();
   }
 

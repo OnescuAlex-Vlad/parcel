@@ -4,72 +4,70 @@ import { Document } from 'mongoose';
 export type OrderDocument = Order & Document;
 
 export enum OrderStatus {
-  CREATED = 'created',
-  PICKED_UP = 'picked_up',
-  DELIVERED = 'delivered',
-  CANCELLED = 'cancelled',
+  CREATED = 'CREATED',
+  PICKED_UP = 'PICKED_UP',
+  DELIVERED = 'DELIVERED',
+  CANCELLED = 'CANCELLED',
 }
 
 @Schema()
 export class Address {
-  @Prop({ required: true })
+  @Prop()
   address: string;
 
-  @Prop({ required: true })
+  @Prop()
   city: string;
 
-  @Prop({ required: true })
+  @Prop()
   country: string;
 
-  @Prop({ required: true })
+  @Prop()
   email: string;
 
-  @Prop({ required: true })
+  @Prop()
   name: string;
 
-  @Prop({ required: true })
+  @Prop()
   zipcode: string;
 
-  @Prop({ required: true })
+  @Prop()
   phoneNumber: string;
 }
 
 @Schema()
 export class Package {
-  @Prop({ required: true })
+  @Prop()
   height: number;
 
-  @Prop({ required: true })
+  @Prop()
   length: number;
 
-  @Prop({ required: true })
+  @Prop()
   width: number;
 
-  @Prop({ required: true })
+  @Prop()
   weight: number;
 }
 
 @Schema()
 export class Order {
-  @Prop()
-  id: string;
+  _id: string;
 
-  @Prop({ required: true, type: Address })
+  @Prop()
   dropoff: Address;
 
-  @Prop({ required: true, type: Address })
+  @Prop()
   pickup: Address;
 
-  @Prop({ required: true, type: [Package] })
+  @Prop()
   packages: Package[];
 
   @Prop()
   price: number;
 
-  @Prop({ required: true })
-  status: string;
+  @Prop()
+  status: OrderStatus;
 }
-
 
 export const OrderSchema = SchemaFactory.createForClass(Order);
 
@@ -85,13 +83,14 @@ OrderSchema.pre('save', function(next) {
 
     if (volume > 5000) {
       const volumeIncrease = Math.ceil(volume / 5000) - 1;
-      price += volumeIncrease * 0.5; // Add €0.50 for every 5000 increase in volume
+      console.log('Volume Increase:', volumeIncrease);
+      price += volumeIncrease; 
     }
 
     price += weight * 0.1; // Add €0.10 for every kilogram of weight
   });
 
   order.price = price;
-
+  
   next();
 });

@@ -1,4 +1,4 @@
-FROM node:latest as builder
+FROM  node:18 as builder
 
 WORKDIR /app
 COPY package*.json ./
@@ -9,7 +9,7 @@ RUN npm run build
 
 # Build the image as production
 # So we can minimize the size
-FROM node:latest
+FROM  node:18
 
 WORKDIR /app
 COPY package*.json ./

@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Order, OrderDocument, OrderStatus } from './order.schema';
 import { Model } from 'mongoose';
 import { CreateOrderDto } from './dto/create-order.dto';
+import orderStateMachine from './orderStateMx';
 
 @Injectable()
 export class OrderService {
@@ -46,10 +47,36 @@ export class OrderService {
 
   async updateOrderStatus(orderId: string, status: OrderStatus): Promise<Order> {
     const order = await this.OrderModel.findById(orderId);
-    console.log('order', orderId);
 
-    order.status = status;
+    
+    console.log('current status', order.status);
+    console.log('next status', status);
+
+    let nextState;
+    switch (status) {
+      case OrderStatus.CREATED:
+        nextState = 'PICKED_UP';
+        break;
+      case OrderStatus.PICKED_UP:
+        nextState = 'DELIVERED';
+        break;
+      case OrderStatus.DELIVERED:
+        nextState = 'RETURNED';
+        break;
+      default:
+        throw new Error('Invalid state transition');
+    }
+
+    order.status = nextState;
     return await order.save();
+  }
+
+  async searchOrderByDropoffAddress(address: string, postalCode: string): Promise<string[]> {
+    const orders = await this.OrderModel.find({
+      'dropoff.address': { $regex: address, $options: 'i' }, // Case-insensitive partial match
+      'dropoff.zipcode': postalCode, // Full match for postal code
+    });
+    return orders.map((order) => order.id);
   }
 
   async deleteOrder(id: string): Promise<void> {

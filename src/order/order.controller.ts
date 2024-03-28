@@ -3,7 +3,6 @@ import {
   Controller,
   Delete,
   Get,
-  NotFoundException,
   Param,
   Post,
   Put,
@@ -38,7 +37,28 @@ export class OrderController {
       updateOrderStatusDto.id,
       updateOrderStatusDto.status,
     );
-    return { message: 'Order status updated successfully', order };
+
+    return {
+      message: 'Order status updated successfully',
+      id: updateOrderStatusDto.id,
+      oldOrder: updateOrderStatusDto.status,
+      newStatus: order.status,
+    };
+  }
+
+  @Post('search')
+  async searchOrderByDropoffAddress(
+    @Body() searchParams: { address: string; postalCode: string },
+  ) {
+    const { address, postalCode } = searchParams;
+    const orderIds = await this.orderService.searchOrderByDropoffAddress(
+      address,
+      postalCode,
+    );
+    return {
+      message: 'Orders found',
+      orderIds,
+    };
   }
 
   @Get('/list')

@@ -83,7 +83,6 @@ OrderSchema.pre('save', function(next) {
 
     if (volume > 5000) {
       const volumeIncrease = Math.ceil(volume / 5000) - 1;
-      console.log('Volume Increase:', volumeIncrease);
       price += volumeIncrease; 
     }
 

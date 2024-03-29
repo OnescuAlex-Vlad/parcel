@@ -30,18 +30,26 @@ export class OrderController {
     try {
       const order = await this.orderService.createOrder(createOrderDto);
       this.logOrderCreationSuccess(order);
-      return this.createSuccessResponse(order);
+      return {
+        status: 201,
+        message: 'Order created successfully',
+        order: this.formatOrderResponse(order),
+      };
     } catch (error) {
       this.logOrderCreationFailure(error);
-      return this.createErrorResponse(error);
+      return {
+        status: 500,
+        message: 'Failed to create order',
+        error: error.message,
+      };
     }
   }
 
-  @Post('/status')
   @ApiOperation({ summary: 'Update order status by ID' })
   @ApiBody({ type: UpdateOrderStatusDto })
   @ApiResponse({ status: 200, description: 'Order status updated successfully' })
   @ApiResponse({ status: 400, description: 'Bad request' })
+  @Post('/status')
   async updateOrderStatus(@Body() updateOrderStatusDto: UpdateOrderStatusDto) {
     try {
       const order = await this.orderService.updateOrderStatus(
@@ -53,22 +61,26 @@ export class OrderController {
         updateOrderStatusDto.status,
         order.status,
       );
-      return this.createStatusUpdateSuccessResponse(
-        updateOrderStatusDto.id,
-        updateOrderStatusDto.status,
-        order.status,
-      );
+      return {
+        status: 200,
+        message: 'Order status updated successfully',
+        order: this.formatOrderResponse(order),
+      };
     } catch (error) {
       this.logOrderStatusUpdateFailure(error);
-      return this.createStatusUpdateErrorResponse(error);
+      return {
+        status: 500,
+        message: 'Failed to update order status',
+        error: error.message,
+      };
     }
   }
 
-  @Post('search')
   @ApiOperation({ summary: 'Search orders by dropoff address' })
   @ApiBody({ type: CreateOrderDto })
   @ApiResponse({ status: 200, description: 'Orders found' })
   @ApiResponse({ status: 400, description: 'Bad request' })
+  @Post('search')
   async searchOrderByDropoffAddress(
     @Body() searchParams: { address: string; postalCode: string },
   ) {
@@ -79,10 +91,18 @@ export class OrderController {
         postalCode,
       );
       this.logOrdersFound(orderIds);
-      return this.createOrdersFoundResponse(orderIds);
+      return {
+        status: 200,
+        message: 'Orders found',
+        orderIds,
+      };
     } catch (error) {
       this.logSearchOrdersFailure(error);
-      return this.createSearchOrdersErrorResponse(error);
+      return {
+        status: 500,
+        message: 'Failed to search orders by dropoff address',
+        error: error.message,
+      };
     }
   }
 

@@ -43,7 +43,7 @@ export class OrderService {
     } catch (error) {
       throw new NotFoundException(`order with id:${id} not found `);
     }
-    const updatedOrder = this.OrderModel.findById(id);
+    const updatedOrder = await this.OrderModel.findById(id);
     return updatedOrder;
   }
 

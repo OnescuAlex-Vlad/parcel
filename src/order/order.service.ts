@@ -3,7 +3,6 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Order, OrderDocument, OrderStatus } from './order.schema';
 import { Model } from 'mongoose';
 import { CreateOrderDto } from './dto/create-order.dto';
-import orderStateMachine from './orderStateMx';
 
 @Injectable()
 export class OrderService {
@@ -17,9 +16,8 @@ export class OrderService {
       status: OrderStatus.CREATED,
     });
     
-    const order = await createdOrder.save();
    
-    return order;
+    return  await createdOrder.save();
   }
 
   async findOrder(id: string): Promise<Order> {
@@ -40,7 +38,11 @@ export class OrderService {
     id: string,
     createOrderDto: CreateOrderDto,
   ): Promise<Order> {
-    await this.OrderModel.updateOne({ _id: id }, createOrderDto);
+    try {
+      await this.OrderModel.updateOne({ _id: id }, createOrderDto);
+    } catch (error) {
+      throw new NotFoundException(`order with id:${id} not found `);
+    }
     const updatedOrder = this.OrderModel.findById(id);
     return updatedOrder;
   }
@@ -48,9 +50,6 @@ export class OrderService {
   async updateOrderStatus(orderId: string, status: OrderStatus): Promise<Order> {
     const order = await this.OrderModel.findById(orderId);
 
-    
-    console.log('current status', order.status);
-    console.log('next status', status);
 
     let nextState;
     switch (status) {
